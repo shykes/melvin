@@ -1,6 +1,6 @@
 {
   "name": "melvin",
-  "engineVersion": "v0.15.3-010101000000-dev-c81395b3bd07",
+  "engineVersion": "v0.15.3",
   "sdk": "go",
   "source": "."
 }

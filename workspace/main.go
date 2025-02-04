@@ -30,8 +30,9 @@ func New(
 
 // A workspace for editing files and checking the result
 type Workspace struct {
-	Start   *dagger.Directory // +private
-	Dir     *dagger.Directory // +private
+	Start *dagger.Directory // +private
+	// An immutable snapshot of the workspace contents
+	Dir     *dagger.Directory
 	Checker *dagger.Container // +private
 }
 

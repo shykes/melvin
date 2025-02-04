@@ -20,7 +20,7 @@ fi
 echo "Building CLI and starting engine. To connect, type:"
 echo "_EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234 ~/bin/dagger-llm shell"
 
-dagger shell <<EOF
+dagger shell --no-mod <<EOF
 github.com/shykes/dagger@llm | cli | binary --platform=current | export "$HOME/bin/dagger-llm"
 github.com/shykes/dagger@llm | engine | service llm | up
 EOF

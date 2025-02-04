@@ -38,26 +38,31 @@ type Workspace struct {
 // Check that the current contents is valid
 // This is done by executed an externally-provided checker container with the workspace mounted.
 // If there is no checker, the check will always pass
-func (s Workspace) Check(ctx context.Context) error {
+func (s Workspace) Check(ctx context.Context) (string, error) {
 	if s.Checker == nil {
-		return nil
+		return "No checker configured", nil
 	}
-	_, err := s.Checker.
+	return s.Checker.
 		WithMountedDirectory(".", s.Dir).
-		WithExec(nil, dagger.ContainerWithExecOpts{
-			Expect: dagger.ReturnTypeAny,
-		}).
-		Sync(ctx)
-	return err
+		WithExec(nil).
+		Stdout(ctx)
 }
 
-// Return all changes to the workspace since the start of the session
+// Return all changes to the workspace since the start of the session,
+// in unified diff format, with the following convention:
+// - before/ is the start state
+// - after/ is the current state
 func (ws Workspace) Diff(ctx context.Context) (string, error) {
 	return base().
 		WithWorkdir("/workspace").
-		WithMountedDirectory("start", ws.Start).
-		WithMountedDirectory("current", ws.Dir).
-		WithExec([]string{"diff", "-r", "./start", "./current"}).
+		WithMountedDirectory("before", ws.Start).
+		WithMountedDirectory("after", ws.Dir).
+		WithExec(
+			[]string{"diff", "-ruN", "before", "after"},
+			// diff returns non-zero exit code if there's a difference.
+			// So we tell dagger not to throw an error on non-zero exit code
+			dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny},
+		).
 		Stdout(ctx)
 }
 

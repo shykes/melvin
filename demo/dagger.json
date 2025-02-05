@@ -1,0 +1,17 @@
+{
+  "name": "demo",
+  "engineVersion": "v0.15.3",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "go",
+      "source": "github.com/dagger/dagger/modules/go",
+      "pin": "a99139ba894f240808fa6c1c9fd995ffba58cf41"
+    },
+    {
+      "name": "workspace",
+      "source": "../workspace"
+    }
+  ],
+  "source": "."
+}

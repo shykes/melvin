@@ -43,10 +43,14 @@ func (s Workspace) Check(ctx context.Context) (string, error) {
 	if s.Checker == nil {
 		return "No checker configured", nil
 	}
-	return s.Checker.
+	stdout, err := s.Checker.
 		WithMountedDirectory(".", s.Dir).
 		WithExec(nil).
 		Stdout(ctx)
+	if err == nil && stdout == "" {
+		stdout = "ok\n"
+	}
+	return stdout, err
 }
 
 // Return all changes to the workspace since the start of the session,

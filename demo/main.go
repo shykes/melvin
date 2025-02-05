@@ -25,7 +25,10 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	result := dag.
 		Llm().
 		WithWorkspace(workspace).
-		WithPrompt("You are a Go programmer. Use your workspace to accomplish the given task. Check your work with the 'check' tool").
-		Workspace()
-	return dag.Go(result.Dir()).Env()
+		WithPrompt("You are a Go programmer. Use your workspace to accomplish the given task. Check your work with the 'check' tool\n<task>\n" + task + "\n</task>").
+		Workspace().
+		Dir()
+	return dag.Container().
+		From("golang").
+		WithDirectory(".", result)
 }

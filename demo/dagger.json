@@ -1,8 +1,12 @@
 {
   "name": "demo",
-  "engineVersion": "v0.15.3",
+  "engineVersion": "v0.15.4-250205162304-431135c10af2",
   "sdk": "go",
   "dependencies": [
+    {
+      "name": "github",
+      "source": "../github"
+    },
     {
       "name": "go",
       "source": "github.com/dagger/dagger/modules/go",

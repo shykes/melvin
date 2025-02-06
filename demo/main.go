@@ -43,8 +43,13 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	}
 	// Extract a progress report title from the task description
 	title, err := dag.Llm().
-		WithPrompt("<input>" + assignment + "</input>\n 1) summarize to a single sentence 2) rewrite from task description form to status update form, for example 'pass the butter' becomes 'passing the butter'").
-		LastReply(ctx)
+		WithPrompt(fmt.Sprintf(
+			`You will be given an input.
+Summarize it to a short title, suitable as the title of a status update document it to a status update.
+<input>
+%s
+</input>
+`, assignment)).LastReply(ctx)
 	if err != nil {
 		return nil, err
 	}

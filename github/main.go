@@ -40,9 +40,9 @@ type ProgressReport struct {
 	RepoName  string // +private
 	Issue     int    // +private
 	Key       string // +private
-	Title     string // +private
-	Summary   string // +private
-	Tasks     []Task // +private
+	Title     string
+	Summary   string
+	Tasks     []Task
 }
 
 type Task struct {

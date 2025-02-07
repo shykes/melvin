@@ -1,0 +1,12 @@
+You have received a new assignment.
+Publish an initial progress update with a concise title and summary, to indicate that the assignment has been received and is being processed.
+
+- Don't capitalize the title, use regular title casing
+- Write like an experienced software engineer communicating on an open-source project. Precise, informative, pragmatic
+- Don't use over-complicated words
+
+Do not start any tasks.
+
+<assignment>
+$assignment
+</assignment>

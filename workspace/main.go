@@ -49,14 +49,18 @@ func (s Workspace) Check(ctx context.Context) (string, error) {
 	if s.Checker == nil {
 		return "No checker configured", nil
 	}
-	stdout, err := s.Checker.
+	check := s.Checker.
 		WithMountedDirectory(".", s.Dir).
-		WithExec(nil).
-		Stdout(ctx)
-	if err == nil && stdout == "" {
-		stdout = "ok\n"
+		WithExec(nil, dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny})
+	code, err := check.ExitCode(ctx)
+	if err != nil {
+		return "", err
 	}
-	return stdout, err
+	if code != 0 {
+		stderr, err := check.Stderr(ctx)
+		return "error: " + stderr, err
+	}
+	return check.Stdout(ctx)
 }
 
 // Return all changes to the workspace since the start of the session,

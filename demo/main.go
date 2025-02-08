@@ -105,6 +105,9 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	// Fork repo name
 	// +optional
 	forkName string,
+	// Fork the upstream Repo
+	// +optional
+	fork bool,
 ) (string, error) {
 	work, err := m.GoProgrammer(ctx, start, assignment, coderPrompt, reporterPrompt)
 	if err != nil {
@@ -115,7 +118,7 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	title, err := dag.Llm().
 		WithPrompt(fmt.Sprintf(
 			`You will be given an input.
-Summarize it to a short title, suitable as the title of a status update document it to a status update.
+Summarize it to a short title, suitable as the title of a pull request for the assignment. Be extremely brief.
 <input>
 %s
 </input>
@@ -128,7 +131,7 @@ Summarize it to a short title, suitable as the title of a status update document
 	body, err := dag.Llm().
 		WithPrompt(fmt.Sprintf(
 			`You will be given an input.
-Summarize it to a short paragraph, suitable as the body of a pull request containing the new feature.
+Summarize it to a short paragraph, suitable as the body of a pull request containing the new feature. Be extremely brief.
 <input>
 %s
 </input>
@@ -141,7 +144,7 @@ Summarize it to a short paragraph, suitable as the body of a pull request contai
 	branch, err := dag.Llm().
 		WithPrompt(fmt.Sprintf(
 			`You will be given an input.
-Come up with a short suitable git branch name for a change set solving the assignment.
+Come up with a short suitable git branch name for a change set solving the assignment. The branch name should be no more than 20 alphanumeric characters.
 <input>
 %s
 </input>
@@ -152,6 +155,7 @@ Come up with a short suitable git branch name for a change set solving the assig
 
 	// Lookup git remote
 	remote, err := dag.FeatureBranch().
+		WithGithubToken(m.Token).
 		WithChanges(changes).
 		GetRemoteURL(ctx, "origin")
 	if err != nil {
@@ -161,6 +165,9 @@ Come up with a short suitable git branch name for a change set solving the assig
 	fbCreateOpts := dagger.FeatureBranchCreateOpts{}
 	if forkName != "" {
 		fbCreateOpts.ForkName = forkName
+	}
+	if fork {
+		fbCreateOpts.Fork = fork
 	}
 
 	return dag.FeatureBranch().

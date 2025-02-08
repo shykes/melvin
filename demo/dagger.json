@@ -4,6 +4,11 @@
   "sdk": "go",
   "dependencies": [
     {
+      "name": "feature-branch",
+      "source": "github.com/kpenfound/feature-branch",
+      "pin": "71d63322bf9979eb97b9e5d1457a3dcba4ef0ec4"
+    },
+    {
       "name": "github",
       "source": "../github"
     },

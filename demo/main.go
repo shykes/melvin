@@ -4,6 +4,7 @@ import (
 	"context"
 	"dagger/demo/internal/dagger"
 	"fmt"
+	"strings"
 )
 
 func New(
@@ -83,4 +84,107 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	}
 	// Show the result in an interactive terminal, for convenience
 	return dag.Container().From("golang").WithDirectory(".", coder.Workspace().Dir()), nil
+}
+
+// Automate a Go programming task with a LLM and create a Pull request
+// The input is a prompt and an optional starting point.
+// The output is the generated / modified source code in a containerized dev environment
+func (m *Demo) GoProgrammerPr(ctx context.Context,
+	// A starting point for the coder's workspace.
+	// Defaults to an empty directory
+	// +optional
+	start *dagger.Directory,
+	// A description of the Go programming task to perform
+	assignment string,
+	// +optional
+	// +defaultPath="prompts/coder.txt"
+	coderPrompt *dagger.File,
+	// +optional
+	// +defaultPath="prompts/reporter-start.txt"
+	reporterPrompt *dagger.File,
+	// Fork repo name
+	// +optional
+	forkName string,
+	// Fork the upstream Repo
+	// +optional
+	fork bool,
+) (string, error) {
+	work, err := m.GoProgrammer(ctx, start, assignment, coderPrompt, reporterPrompt)
+	if err != nil {
+		return "", err
+	}
+	changes := work.Directory(".")
+	// Determine PR title
+	title, err := dag.Llm().
+		WithPrompt(fmt.Sprintf(
+			`You will be given an input.
+Summarize it to a short title, suitable as the title of a pull request for the assignment. Be extremely brief.
+<input>
+%s
+</input>
+`, assignment)).LastReply(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// Determine PR body
+	body, err := dag.Llm().
+		WithPrompt(fmt.Sprintf(
+			`You will be given an input.
+Summarize it to a short paragraph, suitable as the body of a pull request containing the new feature. Be extremely brief.
+<input>
+%s
+</input>
+`, assignment)).LastReply(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// Determine branch name
+	branch, err := dag.Llm().
+		WithPrompt(fmt.Sprintf(
+			`You will be given an input.
+Come up with a short suitable git branch name for a change set solving the assignment. The branch name should be no more than 20 alphanumeric characters.
+<input>
+%s
+</input>
+`, assignment)).LastReply(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// Lookup git remote
+	remote, err := dag.FeatureBranch().
+		WithGithubToken(m.Token).
+		WithChanges(changes).
+		GetRemoteURL(ctx, "origin")
+	if err != nil {
+		return "", err
+	}
+
+	fbCreateOpts := dagger.FeatureBranchCreateOpts{}
+	if forkName != "" {
+		fbCreateOpts.ForkName = forkName
+	}
+	if fork {
+		fbCreateOpts.Fork = fork
+	}
+
+	return dag.FeatureBranch().
+		WithGithubToken(m.Token).
+		Create(remote, branch, fbCreateOpts).
+		WithChanges(changes.WithoutDirectory(".git")).
+		PullRequest(ctx, title, body)
+}
+
+func parseGithubUrl(url string) (string, string, bool) {
+	parts := strings.Split(url, "/")
+	if len(parts) < 3 {
+		return "", "", false
+	}
+	// Remove github.com prefix if present
+	if parts[0] == "github.com" {
+		parts = parts[1:]
+	}
+	return parts[0], parts[1], true
 }

@@ -6,7 +6,7 @@
     {
       "name": "github-comment",
       "source": "github.com/aluzzardi/daggerverse/github-comment",
-      "pin": "a01a4b18eb4b01e80b3936b330cf195f1f7b002c"
+      "pin": "ee43f9e5f7203362a9d089d5b65e95f323e5dc65"
     }
   ],
   "source": "."

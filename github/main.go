@@ -17,32 +17,28 @@ func (gh Github) NewProgressReport(
 	key string,
 	// GitHub authentication token
 	token *dagger.Secret,
-	// Owner of the GitHub repository
-	repoOwner string,
-	// Name of the GitHub repository
-	repoName string,
+	// Github repository to send updates
+	repo string,
 	// Issue number to report progress on
 	issue int,
 ) ProgressReport {
 	return ProgressReport{
-		Token:     token,
-		RepoOwner: repoOwner,
-		RepoName:  repoName,
-		Issue:     issue,
-		Key:       key,
+		Token: token,
+		Repo:  repo,
+		Issue: issue,
+		Key:   key,
 	}
 }
 
 // A system for reporting on the progress of a task on a github issue
 type ProgressReport struct {
-	Token     *dagger.Secret
-	RepoOwner string // +private
-	RepoName  string // +private
-	Issue     int    // +private
-	Key       string // +private
-	Title     string
-	Summary   string
-	Tasks     []Task
+	Token   *dagger.Secret
+	Repo    string // +private
+	Issue   int    // +private
+	Key     string // +private
+	Title   string
+	Summary string
+	Tasks   []Task
 }
 
 type Task struct {
@@ -61,6 +57,29 @@ func (r ProgressReport) WriteSummary(
 	summary string,
 ) (ProgressReport, error) {
 	r.Summary = summary
+	return r, nil
+}
+
+// Append new text to the summary, without overwriting it
+// This function only stages the change. Call publish to actually apply it.
+func (r ProgressReport) AppendSummary(
+	ctx context.Context,
+	// The text of the summary, markdown-formatted
+	// It will be formatted as-is in the comment, after the title and before the task list
+	summary string,
+) (ProgressReport, error) {
+	if r.Summary == "" {
+		r.Summary = summary
+		return r, nil
+	}
+	sep := "\n"
+	// If the current summary already ends with a newline,
+	// don't add another one to avoid double newlines
+	if strings.HasSuffix(r.Summary, "\n") {
+		sep = ""
+	}
+	// Trim whitespace from current summary, add separator and new summary
+	r.Summary = strings.TrimSpace(r.Summary) + sep + summary
 	return r, nil
 }
 
@@ -134,7 +153,7 @@ func (r ProgressReport) Publish(ctx context.Context) error {
 		contents += "</table>\n"
 	}
 	contents += fmt.Sprintf("\n<sub>*Last update: %s*<sub>\n", time.Now().Local().Format("2006-01-02 15:04:05 MST"))
-	comment := dag.GithubComment(r.Token, r.RepoOwner, r.RepoName, dagger.GithubCommentOpts{Issue: r.Issue, MessageID: r.Key})
+	comment := dag.GithubComment(r.Token, r.Repo, dagger.GithubCommentOpts{Issue: r.Issue, MessageID: r.Key})
 	_, err := comment.Create(ctx, contents)
 	return err
 }

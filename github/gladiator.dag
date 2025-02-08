@@ -1,8 +1,0 @@
-#!/usr/bin/env dagger-llm shell
-
-llm |
-with-github-progress-report $(
-  new-progress-report gladiator GH_TOKEN kpenfound dagger-modules 8
-) |
-with-prompt "You are the hero of the movie Gladiator. Retrace your whole journey, and send us updates as you experience it, in the style of your time. Also keep track of your tasks throghout the adventure. Continue until the whole journey is complete. Make it thorough and captivating. Be detailed and thorough in the task list" |
-history

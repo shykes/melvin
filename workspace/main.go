@@ -32,8 +32,14 @@ func New(
 type Workspace struct {
 	Start *dagger.Directory // +private
 	// An immutable snapshot of the workspace contents
-	Dir     *dagger.Directory
-	Checker *dagger.Container // +private
+	Dir         *dagger.Directory
+	Checker     *dagger.Container // +private
+	Checkpoints []Checkpoint      // +private
+}
+
+type Checkpoint struct {
+	Description string
+	Dir         *dagger.Directory
 }
 
 // Check that the current contents is valid
@@ -43,14 +49,18 @@ func (s Workspace) Check(ctx context.Context) (string, error) {
 	if s.Checker == nil {
 		return "No checker configured", nil
 	}
-	stdout, err := s.Checker.
+	check := s.Checker.
 		WithMountedDirectory(".", s.Dir).
-		WithExec(nil).
-		Stdout(ctx)
-	if err == nil && stdout == "" {
-		stdout = "ok\n"
+		WithExec(nil, dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny})
+	code, err := check.ExitCode(ctx)
+	if err != nil {
+		return "", err
 	}
-	return stdout, err
+	if code != 0 {
+		stderr, err := check.Stderr(ctx)
+		return "error: " + stderr, err
+	}
+	return check.Stdout(ctx)
 }
 
 // Return all changes to the workspace since the start of the session,
@@ -69,6 +79,24 @@ func (ws Workspace) Diff(ctx context.Context) (string, error) {
 			dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny},
 		).
 		Stdout(ctx)
+}
+
+// Checkpoint the current state of the workspace, with a description of the changes made.
+func (ws Workspace) Checkpoint(description string) Workspace {
+	ws.Checkpoints = append(ws.Checkpoints, Checkpoint{
+		Description: description,
+		Dir:         ws.Dir,
+	})
+	return ws
+}
+
+// Return a history of all checkpoints so far, from first to last
+func (ws Workspace) History() []string {
+	var history []string
+	for _, checkpoint := range ws.Checkpoints {
+		history = append(history, checkpoint.Description)
+	}
+	return history
 }
 
 // Reset the workspace to its starting state.

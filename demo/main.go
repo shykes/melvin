@@ -46,7 +46,8 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	// Send the initial progress report (we will update it later)
 	progress = dag.Llm().
 		WithGithubProgressReport(progress).
-		WithPromptFile(reporterPrompt, dagger.LlmWithPromptFileOpts{Vars: []string{"assignment", assignment}}).
+		WithPromptVar("assignment", assignment).
+		WithPromptFile(reporterPrompt).
 		GithubProgressReport()
 	if err := progress.Publish(ctx); err != nil {
 		return nil, err
@@ -60,7 +61,8 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	coder := dag.
 		Llm().
 		WithWorkspace(workspace).
-		WithPromptFile(coderPrompt, dagger.LlmWithPromptFileOpts{Vars: []string{"assignment", assignment}})
+		WithPromptVar("assignment", assignment).
+		WithPromptFile(coderPrompt)
 	// Save the modified workspace
 	workspace = coder.Workspace()
 	// Inspect t he workspace history, publish it as tasks in the progress report
@@ -95,6 +97,7 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	// +optional
 	start *dagger.Directory,
 	// A description of the Go programming task to perform
+	// +optional
 	assignment string,
 	// +optional
 	// +defaultPath="prompts/coder.txt"
@@ -109,6 +112,15 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	// +optional
 	fork bool,
 ) (string, error) {
+	// Get assignment from issue if not provided
+	if assignment == "" {
+		progress := dag.Github().NewProgressReport(assignment, m.Token, m.Repo, m.Issue)
+		issueBody, err := progress.Issue().Body(ctx)
+		if err != nil {
+			return "", err
+		}
+		assignment = issueBody
+	}
 	work, err := m.GoProgrammer(ctx, start, assignment, coderPrompt, reporterPrompt)
 	if err != nil {
 		return "", err
@@ -126,19 +138,10 @@ Summarize it to a short title, suitable as the title of a pull request for the a
 	if err != nil {
 		return "", err
 	}
+	title = strings.Trim(title, "\"")
 
-	// Determine PR body
-	body, err := dag.Llm().
-		WithPrompt(fmt.Sprintf(
-			`You will be given an input.
-Summarize it to a short paragraph, suitable as the body of a pull request containing the new feature. Be extremely brief.
-<input>
-%s
-</input>
-`, assignment)).LastReply(ctx)
-	if err != nil {
-		return "", err
-	}
+	// Use assignment for PR body
+	body := "Assignment: " + assignment
 
 	// Determine branch name
 	branch, err := dag.Llm().

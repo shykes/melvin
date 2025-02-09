@@ -6,6 +6,7 @@ You are a Go programmer receiving an assignment.
 - If you see opportunity for unrelated improvement, either add a TODO comment, or add an entry to TODO.txt; and checkpoint that change separately
 - Check that your work builds with the 'check' tool
 - Continue until your assignment is completed, and the check succeeds
+- Always write changes to files to the original files in the workspace
 
 <assignment>
 $assignment

@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/google/go-github/v59/github"
 )
 
 type Github struct{}
 
 // NewProgressReport creates a new progress report for tracking tasks on a GitHub issue
 func (gh Github) NewProgressReport(
+	ctx context.Context,
 	// A unique identifier for this progress report in the given issue.
 	// Using the same key on the same issue will overwrite the same comment in the issue
 	key string,
@@ -22,10 +25,18 @@ func (gh Github) NewProgressReport(
 	// Issue number to report progress on
 	issue int,
 ) ProgressReport {
+	ghIssue, err := loadGithubIssue(ctx, token, repo, issue)
+	if err != nil {
+		ghIssue = &GithubIssue{
+			IssueNumber: issue,
+			Title:       "",
+			Body:        "",
+		}
+	}
 	return ProgressReport{
 		Token: token,
 		Repo:  repo,
-		Issue: issue,
+		Issue: ghIssue,
 		Key:   key,
 	}
 }
@@ -34,8 +45,8 @@ func (gh Github) NewProgressReport(
 type ProgressReport struct {
 	Token   *dagger.Secret
 	Repo    string // +private
-	Issue   int    // +private
 	Key     string // +private
+	Issue   *GithubIssue
 	Title   string
 	Summary string
 	Tasks   []Task
@@ -153,7 +164,62 @@ func (r ProgressReport) Publish(ctx context.Context) error {
 		contents += "</table>\n"
 	}
 	contents += fmt.Sprintf("\n<sub>*Last update: %s*<sub>\n", time.Now().Local().Format("2006-01-02 15:04:05 MST"))
-	comment := dag.GithubComment(r.Token, r.Repo, dagger.GithubCommentOpts{Issue: r.Issue, MessageID: r.Key})
+	comment := dag.GithubComment(r.Token, r.Repo, dagger.GithubCommentOpts{Issue: r.Issue.IssueNumber, MessageID: r.Key})
 	_, err := comment.Create(ctx, contents)
 	return err
+}
+
+type GithubIssue struct {
+	IssueNumber int
+	Title       string
+	Body        string
+}
+
+func loadGithubIssue(ctx context.Context, token *dagger.Secret, repo string, id int) (*GithubIssue, error) {
+	// Strip .git suffix if present
+	repo = strings.TrimSuffix(repo, ".git")
+
+	// Remove https:// or http:// prefix if present
+	repo = strings.TrimPrefix(repo, "https://")
+	repo = strings.TrimPrefix(repo, "http://")
+
+	// Remove github.com/ prefix if present
+	repo = strings.TrimPrefix(repo, "github.com/")
+
+	// Split remaining string into owner/repo
+	parts := strings.Split(repo, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid repository format: %s", repo)
+	}
+
+	owner := parts[0]
+	repo = parts[1]
+
+	ghClient, err := githubClient(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	issue, _, err := ghClient.Issues.Get(ctx, owner, repo, id)
+	if err != nil {
+		return nil, err
+	}
+
+	ghi := &GithubIssue{IssueNumber: id}
+	if issue.Title != nil {
+		ghi.Title = *issue.Title
+	}
+	if issue.Body != nil {
+		ghi.Body = *issue.Body
+	}
+
+	return ghi, nil
+}
+
+func githubClient(ctx context.Context, token *dagger.Secret) (*github.Client, error) {
+	plaintoken, err := token.Plaintext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return github.NewClient(nil).WithAuthToken(plaintoken), nil
 }

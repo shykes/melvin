@@ -1,0 +1,14 @@
+{
+  "name": "reviewer",
+  "engineVersion": "v0.15.4-250209174041-493a42a5239c",
+  "sdk": {
+    "source": "go"
+  },
+  "dependencies": [
+    {
+      "name": "workspace",
+      "source": "../workspace"
+    }
+  ],
+  "source": "."
+}

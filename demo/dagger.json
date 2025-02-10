@@ -1,7 +1,9 @@
 {
   "name": "demo",
-  "engineVersion": "v0.15.4-250208011047-0239c43ae8ad",
-  "sdk": "go",
+  "engineVersion": "v0.15.4-250209174041-493a42a5239c",
+  "sdk": {
+    "source": "go"
+  },
   "dependencies": [
     {
       "name": "feature-branch",
@@ -16,6 +18,10 @@
       "name": "go",
       "source": "github.com/dagger/dagger/modules/go",
       "pin": "a99139ba894f240808fa6c1c9fd995ffba58cf41"
+    },
+    {
+      "name": "reviewer",
+      "source": "../reviewer"
     },
     {
       "name": "workspace",

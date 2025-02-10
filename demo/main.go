@@ -41,45 +41,72 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	progress = dag.Llm().
 		WithGithubProgressReport(progress).
 		WithPromptVar("assignment", assignment).
-		WithPromptFile(dag.CurrentModule().Source().File("prompts/coder.txt")).
+		WithPromptFile(dag.CurrentModule().Source().File("prompts/reporter-start.txt")).
 		GithubProgressReport()
 	if err := progress.Publish(ctx); err != nil {
 		return nil, err
 	}
 	// Initialize a Go-specific workspace
 	workspace := dag.Workspace(dagger.WorkspaceOpts{
-		Start:   start,
-		Checker: dag.Go(dag.Directory()).Base().WithDefaultArgs([]string{"go", "build", "./..."}),
+		Start: start,
+		Checker: dag.Go(dag.Directory()).Base().
+			WithWorkdir("/app").
+			WithDefaultArgs([]string{"sh", "-c", "go mod tidy && go build ./..."}),
 	})
-	// Implement (single pass, no loop)
-	coder := dag.
-		Llm().
-		WithWorkspace(workspace).
-		WithPromptVar("assignment", assignment).
-		WithPromptFile(dag.CurrentModule().Source().File("prompts/reporter-start.txt"))
-	// Save the modified workspace
-	workspace = coder.Workspace()
-	// Inspect t he workspace history, publish it as tasks in the progress report
-	// FIXME: do this on-the-fly within the devloop
-	history, err := workspace.History(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for i, change := range history {
-		progress = progress.StartTask(fmt.Sprintf("dev-%d", i+1), change, "✅")
-	}
-	// Get the result in diff format, and add it to the progress report
-	result, err := coder.Workspace().Diff(ctx)
-	if err != nil {
-		return nil, err
+	var (
+		diff string
+		err  error
+	)
+	// Implement & review loop
+	for i := 1; ; i++ {
+		workspace = dag.
+			Llm().
+			WithWorkspace(workspace).
+			WithPromptVar("assignment", assignment).
+			WithPromptFile(dag.CurrentModule().Source().File("prompts/coder.txt")).
+			Workspace()
+		diff, err = workspace.Diff(ctx)
+		if err != nil {
+			return nil, err
+		}
+		reviewed := dag.Reviewer().AddReview(assignment, workspace.Dir(), diff)
+		score, err := dag.Reviewer().Score(ctx, reviewed)
+		if err != nil {
+			return nil, err
+		}
+		summary, err := reviewed.File(".review/summary").Contents(ctx)
+		if err != nil {
+			return nil, err
+		}
+		suggestions, err := reviewed.File(".review/suggestions").Contents(ctx)
+		if err != nil {
+			return nil, err
+		}
+		status := "❗"
+		if score >= 7 {
+			status = "✅"
+		}
+		progress = progress.
+			StartTask(
+				fmt.Sprintf("review-%d", i),
+				fmt.Sprintf("Submit review:\n\n````\n%s\n````\n", diff),
+				fmt.Sprintf("%s %d/10: %s\n\n%s", status, score, summary, suggestions),
+			)
+		if err := progress.Publish(ctx); err != nil {
+			return nil, err
+		}
+		if score >= 9 {
+			break
+		}
+		workspace = workspace.CopyDir(".review", reviewed.Directory(".review"))
 	}
 	progress = progress.
-		AppendSummary(fmt.Sprintf("\n### Result\n\n```\n%s\n```\n", result))
+		AppendSummary(fmt.Sprintf("\n### Result\n\n```\n%s\n```\n", diff))
 	if err := progress.Publish(ctx); err != nil {
 		return nil, err
 	}
 	// Show the result in an interactive terminal, for convenience
-	return dag.Container().From("golang").WithDirectory(".", coder.Workspace().Dir()), nil
+	return dag.Container().From("golang").WithDirectory(".", workspace.Dir()), nil
 }
 
 // Automate a Go programming task with a LLM and create a Pull request

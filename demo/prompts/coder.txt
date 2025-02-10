@@ -8,6 +8,20 @@ You are a Go programmer receiving an assignment.
 - Continue until your assignment is completed, and the check succeeds
 - Always write changes to files to the original files in the workspace
 
+INPUTS:
+
+1) Your assignment is:
+
 <assignment>
 $assignment
 </assignment>
+
+2) You have access to a workspace to do your work
+
+3) Information from last review.
+
+- At the file .review/score is the score received at the last review. 0 is worst, 10 is best. If it exists, take the score into account.
+
+- At the file .review/summary is a summary of the last review.
+
+- At the file .review/suggestions are suggestions from the last reviewer, to improve the score. Follow them.

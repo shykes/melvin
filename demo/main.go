@@ -35,19 +35,13 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	start *dagger.Directory,
 	// A description of the Go programming task to perform
 	assignment string,
-	// +optional
-	// +defaultPath="prompts/coder.txt"
-	coderPrompt *dagger.File,
-	// +optional
-	// +defaultPath="prompts/reporter-start.txt"
-	reporterPrompt *dagger.File,
 ) (*dagger.Container, error) {
 	progress := dag.Github().NewProgressReport(assignment, m.Token, m.Repo, m.Issue)
 	// Send the initial progress report (we will update it later)
 	progress = dag.Llm().
 		WithGithubProgressReport(progress).
 		WithPromptVar("assignment", assignment).
-		WithPromptFile(reporterPrompt).
+		WithPromptFile(dag.CurrentModule().Source().File("prompts/coder.txt")).
 		GithubProgressReport()
 	if err := progress.Publish(ctx); err != nil {
 		return nil, err
@@ -62,7 +56,7 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 		Llm().
 		WithWorkspace(workspace).
 		WithPromptVar("assignment", assignment).
-		WithPromptFile(coderPrompt)
+		WithPromptFile(dag.CurrentModule().Source().File("prompts/reporter-start.txt"))
 	// Save the modified workspace
 	workspace = coder.Workspace()
 	// Inspect t he workspace history, publish it as tasks in the progress report
@@ -99,12 +93,6 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	// A description of the Go programming task to perform
 	// +optional
 	assignment string,
-	// +optional
-	// +defaultPath="prompts/coder.txt"
-	coderPrompt *dagger.File,
-	// +optional
-	// +defaultPath="prompts/reporter-start.txt"
-	reporterPrompt *dagger.File,
 	// Fork repo name
 	// +optional
 	forkName string,
@@ -121,7 +109,7 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 		}
 		assignment = issueBody
 	}
-	work, err := m.GoProgrammer(ctx, start, assignment, coderPrompt, reporterPrompt)
+	work, err := m.GoProgrammer(ctx, start, assignment)
 	if err != nil {
 		return "", err
 	}

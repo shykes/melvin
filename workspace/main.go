@@ -117,6 +117,18 @@ func (ws Workspace) Write(
 	return ws
 }
 
+// Copy an entire directory into the workspace
+func (ws Workspace) CopyDir(
+	// The target path
+	path string,
+	// The directory to copy at the target path.
+	// Existing content is overwritten at the file granularity.
+	dir *dagger.Directory,
+) Workspace {
+	ws.Dir = ws.Dir.WithDirectory(path, dir)
+	return ws
+}
+
 // Read the contents of a file in thw workspace
 func (ws Workspace) Read(ctx context.Context, path string) (string, error) {
 	return ws.Dir.File(path).Contents(ctx)

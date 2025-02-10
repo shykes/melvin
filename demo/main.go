@@ -116,13 +116,15 @@ func (m *Demo) GoProgrammerPr(ctx context.Context,
 	changes := work.Directory(".")
 	// Determine PR title
 	title, err := dag.Llm().
-		WithPrompt(fmt.Sprintf(
+		WithPromptVar("input", assignment).
+		WithPrompt(
 			`You will be given an input.
 Summarize it to a short title, suitable as the title of a pull request for the assignment. Be extremely brief.
+
 <input>
-%s
+$input
 </input>
-`, assignment)).LastReply(ctx)
+`).LastReply(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -133,13 +135,15 @@ Summarize it to a short title, suitable as the title of a pull request for the a
 
 	// Determine branch name
 	branch, err := dag.Llm().
-		WithPrompt(fmt.Sprintf(
+		WithPromptVar("input", assignment).
+		WithPrompt(
 			`You will be given an input.
-Come up with a short suitable git branch name for a change set solving the assignment. The branch name should be no more than 20 alphanumeric characters.
+Come up with a short suitable git branch name for a change set solving the assignment.
+The branch name should be no more than 20 alphanumeric characters.
 <input>
-%s
-</input>
-`, assignment)).LastReply(ctx)
+$input
+</input>`).
+		LastReply(ctx)
 	if err != nil {
 		return "", err
 	}

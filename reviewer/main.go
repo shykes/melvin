@@ -24,7 +24,9 @@ func (reviewer *Reviewer) AddReview(
 		WithWorkspace(ws).
 		WithPromptFile(dag.CurrentModule().Source().File("prompt.txt")).
 		Workspace().
-		Dir()
+		Dir().
+		WithoutFile(".review/diff").
+		WithoutFile(".review/assignment")
 }
 
 // Extract the score from a directory with a review added

@@ -95,7 +95,7 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 		if err := progress.Publish(ctx); err != nil {
 			return nil, err
 		}
-		if score >= 9 {
+		if score >= 7 {
 			break
 		}
 		workspace = workspace.CopyDir(".review", reviewed.Directory(".review"))

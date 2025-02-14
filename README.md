@@ -5,41 +5,142 @@
 This project is for educational purposes and should not be used for actual production-grade programming tasks.
 There are several great "programming agent" products on the market, including [Devin](https://devin.ai), [Lovable](https://lovable.dev), [Replit Agent](https://replit.com), [V0](https://v0.dev) and many more.
 
-## Internals
+## Architecture
 
-Melvin is distributed as a module for [Dagger](https://dagger.io), the programmable dag engine.
-We use Dagger to break down Melvin into micro-agents, which can be run and tested independently,
-or assembled into a broader software development workflow.
+Rather than a monolithic application, Melvin is a set of modular components that you can integrate into your application,
+or use individually.
 
-Melvin's core modules are written in Go, but it can be extended by any language,
-since Dagger modules are cross-language.
+Each Melvin module has the following features:
 
-You can run Melvin locally from the command-line; programmatically from your own software (Dagger has SDKs for Python, Go and Typescript);
-or as a MCP tool server to be driven by another agent (coming soon).
+- Runs in containers, for maximum portability and reproducibility
+- Can be run from the command-line, or programmatically via an API
+- Generated bindings for Go, Python, Typescript, PHP (experimental, Java (experimental), and Rust (experimental).
+- End-to-end tracing of prompts, tool calls, and even low-level system operations. 100% of agent state changes are traced.
+- Cross-language extensions. Add your own modules in any language.
+- Platform-independent. No infrastructure lock-in! Runs on any hosting provider that can run containers.
+
+These features are achieved by using the [Dagger Engine](https://dagger.io) as a runtime.
+Dagger is open-source, and can be installed on any machine that can run Linux containers.
+This includes Mac and Windows machines with a Docker-compatible tool installed.
+
+Dagger is the only dependency for Melvin. No other tooling or programming environment is required:
+the entire environment is containerized, for maximum portability.
 
 ## Getting started
 
-1. Execute the `setup.sh` script to build and run the development version of Dagger, that Melvin requires
+Melvin's only dependency is Dagger.
+
+At the moment, it requires a *development version* of Dagger which adds native support for LLM prompting and tool calling.
+Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
+
+### 1. Install Dagger
+
+First, install the latest release of Dagger,
+by following the [official intallation instructions](https://docs.dagger.io/install).
+
+We will use stable Dagger to build and run the development version of Dagger.
+
+### 2. Build dagger-llm client
+
+Run this command from the root of the `melvin` repository:
 
 ```console
-./setup.sh
+dagger shell <<EOF
+./dagger-llm | cli | export $HOME/bin/
+EOF
 ```
 
-2. In another terminal, run a dagger interactive shell configured to use the dev build of dagger:
+This builds the llm-enabled version of the Dagger CLI, and installs it at `~/bin/dagger-llm`.
+
+The first build might take a few minutes. Subsequent builds will be much faster due to caching.
+
+
+### 3. Run the dagger-llm engine
+
+Run this command from the root of the `melvin` repository:
 
 ```console
-_EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234 ~/bin/dagger-llm shell
+dagger shell <<EOF
+./dagger-llm | engine | up
+EOF
 ```
 
-3. You now have an interactive session with the Melvin module loaded. All the components of Melvin are available for you to run and compose.
+This builds the llm-enabled version of the Dagger engine, and runs it.
+Leave it running for the duration of your use of Melvin.
 
-Try:
+
+### 4. Configure your environment
+
+To connect to the development engine when using the development CLI, you need to set an environment variable:
 
 ```console
-llm |
-with-melvin-workspace --checker=$(container | from golang | with-default-args go build .) |
-with-prompt "write a go program that computes the first 100 decimals of Pi, and prints them to the screen" |
-melvin-workspace |
-dir |
-terminal
+export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234
+```
+
+
+### 5. Run Melvin from the command-line
+
+To run Melvin from the command-line, load one of its modules from the dagger CLI,
+and run functions.
+
+For example:
+
+```console
+dagger shell <<EOF
+./demo | go-program "develop a curl clone" | terminal
+EOF
+```
+
+This loads the `./demo` module, calls the function `go-programmer` with a description of a
+program, then runs the `terminal` function on the returned container.
+
+
+You can also explore available functions interactively:
+
+```console
+dagger shell
+```
+
+Then use tab auto-completion to explore.
+
+
+### 6. Integrate Melvin in your application
+
+You can embed Dagger modules into your application. To do so:
+
+1. Initialize a Dagger module at the root of your application.
+This doesn't need to be the root of your git repository - Dagger is monorepo-ready.
+
+```console
+dagger init
+```
+
+2. Install the modules you wish to load
+
+For example, to install the Melvin toy-workspace module:
+
+```console
+dagger install github.com/shykes/melvin/toy-workspace
+```
+
+3. Install a generated client in your project
+
+*TODO: this feature is not yet merged in a stable version of Dagger*
+
+This will configure Dagger to generate client bindings for the language of your choice.
+
+For example, if your project is a Python application:
+
+```console
+dagger client install python
+```
+
+4. Re-generate clients
+
+*TODO: this feature is not yet merged in a stable version of Dagger*
+
+Any time you need to re-generate your client, run:
+
+```console
+dagger client generate
 ```

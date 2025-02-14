@@ -1,6 +1,6 @@
 {
   "name": "dagger-llm",
-  "engineVersion": "v0.15.4-010101000000-dev-f08b82fb9d29",
+  "engineVersion": "v0.15.3",
   "sdk": {
     "source": "go"
   },
@@ -8,7 +8,7 @@
     {
       "name": "dagger-dev",
       "source": "github.com/shykes/dagger@llm",
-      "pin": "7e63c7fdabe3b280b065686801b5843d23eaa053"
+      "pin": "e888a04a1cc0b8d22831b4c0a68bbd9db78c0fbb"
     }
   ],
   "source": "."

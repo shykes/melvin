@@ -26,6 +26,17 @@ This includes Mac and Windows machines with a Docker-compatible tool installed.
 Dagger is the only dependency for Melvin. No other tooling or programming environment is required:
 the entire environment is containerized, for maximum portability.
 
+## Modules
+
+The following modules are currently implemented:
+
+- [toy-workspace](./toy-workspace): a very, very simple development workspace for demo purposes
+- [toy-programmer](./toy-programmer): a very, very simple programmer micro-agent for demo purposes
+- [workspace](./workspace): a slightly more powerful workspace, with checkpoint and history features, and a configurable check function
+- [reviewer](./reviewer): a code reviewer micro-agent
+- [github](./github): a module for sending progress updates in a github issue
+- [demo](./demo): a collection of demo functions tying the other modules together
+
 ## Getting started
 
 Melvin's only dependency is Dagger.
@@ -83,16 +94,16 @@ export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234
 To run Melvin from the command-line, load one of its modules from the dagger CLI,
 and run functions.
 
-For example:
 
 ```console
 dagger shell <<EOF
-./demo | go-program "develop a curl clone" | terminal
+./toy-programmer | go-program "develop a curl clone" | terminal
 EOF
 ```
 
-This loads the `./demo` module, calls the function `go-programmer` with a description of a
-program, then runs the `terminal` function on the returned container.
+
+This loads the `./toy-programmer` module, calls the function `go-program` with a description of a
+program to write, then runs the `terminal` function on the returned container.
 
 
 You can also explore available functions interactively:

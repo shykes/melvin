@@ -1,7 +1,9 @@
 {
   "name": "github",
-  "engineVersion": "v0.15.4-250207020442-075eac5c0946",
-  "sdk": "go",
+  "engineVersion": "v0.15.3",
+  "sdk": {
+    "source": "go"
+  },
   "dependencies": [
     {
       "name": "github-comment",

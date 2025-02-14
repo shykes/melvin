@@ -56,16 +56,22 @@ func convertSlice[I any, O any](in []I, f func(I) O) []O {
 }
 
 func (r ToyWorkspace) MarshalJSON() ([]byte, error) {
-	var concrete struct{}
+	var concrete struct {
+		Container *dagger.Container
+	}
+	concrete.Container = r.Container
 	return json.Marshal(&concrete)
 }
 
 func (r *ToyWorkspace) UnmarshalJSON(bs []byte) error {
-	var concrete struct{}
+	var concrete struct {
+		Container *dagger.Container
+	}
 	err := json.Unmarshal(bs, &concrete)
 	if err != nil {
 		return err
 	}
+	r.Container = concrete.Container
 	return nil
 }
 
@@ -166,62 +172,86 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 	switch parentName {
 	case "ToyWorkspace":
 		switch fnName {
-		case "ContainerEcho":
+		case "Read":
 			var parent ToyWorkspace
 			err = json.Unmarshal(parentJSON, &parent)
 			if err != nil {
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
-			var stringArg string
-			if inputArgs["stringArg"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["stringArg"]), &stringArg)
+			var path string
+			if inputArgs["path"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["path"]), &path)
 				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg stringArg", err))
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg path", err))
 				}
 			}
-			return (*ToyWorkspace).ContainerEcho(&parent, stringArg), nil
-		case "GrepDir":
+			return (*ToyWorkspace).Read(&parent, ctx, path)
+		case "Write":
 			var parent ToyWorkspace
 			err = json.Unmarshal(parentJSON, &parent)
 			if err != nil {
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
-			var directoryArg *dagger.Directory
-			if inputArgs["directoryArg"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["directoryArg"]), &directoryArg)
+			var path string
+			if inputArgs["path"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["path"]), &path)
 				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg directoryArg", err))
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg path", err))
 				}
 			}
-			var pattern string
-			if inputArgs["pattern"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["pattern"]), &pattern)
+			var content string
+			if inputArgs["content"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["content"]), &content)
 				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg pattern", err))
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg content", err))
 				}
 			}
-			return (*ToyWorkspace).GrepDir(&parent, ctx, directoryArg, pattern)
+			return (*ToyWorkspace).Write(&parent, path, content), nil
+		case "Build":
+			var parent ToyWorkspace
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			return (*ToyWorkspace).Build(&parent, ctx)
+		case "":
+			var parent ToyWorkspace
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			return New(), nil
 		default:
 			return nil, fmt.Errorf("unknown function %s", fnName)
 		}
 	case "":
 		return dag.Module().
-			WithDescription("A generated module for ToyWorkspace functions\n\nThis module has been generated via dagger init and serves as a reference to\nbasic module structure as you get started with Dagger.\n\nTwo functions have been pre-created. You can modify, delete, or add to them,\nas needed. They demonstrate usage of arguments and return types using simple\necho and grep commands. The functions can be called from the dagger CLI or\nfrom one of the SDKs.\n\nThe first line in this comment block is a short description line and the\nrest is a long description with more detail on the module's purpose or usage,\nif appropriate. All modules should have a short description.\n").
+			WithDescription("A toy workspace for editing and building go programs\n").
 			WithObject(
-				dag.TypeDef().WithObject("ToyWorkspace", dagger.TypeDefWithObjectOpts{SourceMap: dag.SourceMap("main.go", 22, 6)}).
+				dag.TypeDef().WithObject("ToyWorkspace", dagger.TypeDefWithObjectOpts{SourceMap: dag.SourceMap("main.go", 18, 6)}).
 					WithFunction(
-						dag.Function("ContainerEcho",
-							dag.TypeDef().WithObject("Container")).
-							WithDescription("Returns a container that echoes whatever string argument is provided").
-							WithSourceMap(dag.SourceMap("main.go", 25, 1)).
-							WithArg("stringArg", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{SourceMap: dag.SourceMap("main.go", 25, 38)})).
-					WithFunction(
-						dag.Function("GrepDir",
+						dag.Function("Read",
 							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
-							WithDescription("Returns lines that match a pattern in the files of the provided Directory").
-							WithSourceMap(dag.SourceMap("main.go", 30, 1)).
-							WithArg("directoryArg", dag.TypeDef().WithObject("Directory"), dagger.FunctionWithArgOpts{SourceMap: dag.SourceMap("main.go", 30, 53)}).
-							WithArg("pattern", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{SourceMap: dag.SourceMap("main.go", 30, 85)}))), nil
+							WithDescription("Read a file").
+							WithSourceMap(dag.SourceMap("main.go", 25, 1)).
+							WithArg("path", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The path of the file", SourceMap: dag.SourceMap("main.go", 28, 2)})).
+					WithFunction(
+						dag.Function("Write",
+							dag.TypeDef().WithObject("ToyWorkspace")).
+							WithDescription("Write a file").
+							WithSourceMap(dag.SourceMap("main.go", 33, 1)).
+							WithArg("path", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The path of the file", SourceMap: dag.SourceMap("main.go", 35, 2)}).
+							WithArg("content", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The content to write", SourceMap: dag.SourceMap("main.go", 37, 2)})).
+					WithFunction(
+						dag.Function("Build",
+							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
+							WithDescription("Build the code at the current directory in the workspace").
+							WithSourceMap(dag.SourceMap("main.go", 44, 1))).
+					WithField("Container", dag.TypeDef().WithObject("Container"), dagger.TypeDefWithFieldOpts{Description: "The workspace container.", SourceMap: dag.SourceMap("main.go", 21, 2)}).
+					WithConstructor(
+						dag.Function("New",
+							dag.TypeDef().WithObject("ToyWorkspace")).
+							WithSourceMap(dag.SourceMap("main.go", 9, 1)))), nil
 	default:
 		return nil, fmt.Errorf("unknown object %s", parentName)
 	}

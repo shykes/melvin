@@ -57,7 +57,7 @@ Run this command from the root of the `melvin` repository:
 
 ```console
 dagger shell <<EOF
-./dagger-llm | cli | export $HOME/bin/
+./dagger-llm | cli current | export $HOME/bin/dagger-llm
 EOF
 ```
 
@@ -96,7 +96,7 @@ and run functions.
 
 
 ```console
-dagger shell <<EOF
+dagger-llm shell <<EOF
 ./toy-programmer | go-program "develop a curl clone" | terminal
 EOF
 ```
@@ -109,7 +109,7 @@ program to write, then runs the `terminal` function on the returned container.
 You can also explore available functions interactively:
 
 ```console
-dagger shell
+dagger-llm shell
 ```
 
 Then use tab auto-completion to explore.
@@ -123,7 +123,7 @@ You can embed Dagger modules into your application. To do so:
 This doesn't need to be the root of your git repository - Dagger is monorepo-ready.
 
 ```console
-dagger init
+dagger-llm init
 ```
 
 2. Install the modules you wish to load
@@ -131,7 +131,7 @@ dagger init
 For example, to install the Melvin toy-workspace module:
 
 ```console
-dagger install github.com/shykes/melvin/toy-workspace
+dagger-llm install github.com/shykes/melvin/toy-workspace
 ```
 
 3. Install a generated client in your project
@@ -143,7 +143,7 @@ This will configure Dagger to generate client bindings for the language of your 
 For example, if your project is a Python application:
 
 ```console
-dagger client install python
+dagger-llm client install python
 ```
 
 4. Re-generate clients
@@ -153,5 +153,5 @@ dagger client install python
 Any time you need to re-generate your client, run:
 
 ```console
-dagger client generate
+dagger-llm client generate
 ```

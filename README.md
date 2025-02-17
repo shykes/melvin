@@ -37,21 +37,111 @@ The following modules are currently implemented:
 - [github](./github): a module for sending progress updates in a github issue
 - [demo](./demo): a collection of demo functions tying the other modules together
 
-## Getting started
+## Community
+
+We strongly recommend [joining our Community discord](https://discord.gg/KK3AfBP8Gw).
+The Dagger community is very welcoming, and will be happy to answer your questions, discuss your use case ideas, and help you get started.
+
+Do this now! It will make the rest of the experience more productive, and more fun.
+
+## Run Melvin from the command-line
+
+To run Melvin from the command-line:
+
+- first [complete initial setup](#initial-setup).
+- Load one of the Melvin modules from the dagger CLI, and run functions
+
+For example:
+
+```console
+~/bin/dagger-llm shell <<EOF
+./toy-programmer | go-program "develop a curl clone" | terminal
+EOF
+```
+
+This loads the `./toy-programmer` module, calls the function `go-program` with a description of a
+program to write, then runs the `terminal` function on the returned container.
+
+You can also explore available functions interactively:
+
+```console
+~/bin/dagger-llm shell
+```
+
+Then use tab auto-completion to explore.
+
+
+### Integrate Melvin in your application
+
+You can embed Dagger modules into your application.
+Supported languages are Python, Typescript, Go, Java, PHP - with more language support under development.
+
+1. Initialize a Dagger module at the root of your application.
+This doesn't need to be the root of your git repository - Dagger is monorepo-ready.
+
+```console
+~/bin/dagger-llm init
+```
+
+2. Install the modules you wish to load
+
+For example, to install the Melvin toy-workspace module:
+
+```console
+~/bin/dagger-llm install github.com/shykes/melvin/toy-workspace
+```
+
+3. Install a generated client in your project
+
+*TODO: this feature is not yet merged in a stable version of Dagger*
+
+This will configure Dagger to generate client bindings for the language of your choice.
+
+For example, if your project is a Python application:
+
+```console
+~/bin/dagger-llm client install python
+```
+
+4. Re-generate clients
+
+*TODO: this feature is not yet merged in a stable version of Dagger*
+
+Any time you need to re-generate your client, run:
+
+```console
+~/bin/dagger-llm client generate
+```
+
+## Initial Setup
+
+### Option 1: Quickstart
+
+To get started quickly:
+
+1. Run `./setup.sh` in the root of the repo.
+2. Run `~/bin/dagger-llm shell -c 'llm | with-prompt "llm, are you there?" | last-reply'
+3. If you got a response from the LLM, congratulations! Setup is complete
+
+### Option 2: Not-so-quick-start
+
+If the quickstart script doesn't work, or if you want to understand each step of the setup, follow these instructions.
+
+#### Overview
 
 Melvin's only dependency is Dagger.
 
 At the moment, it requires a *development version* of Dagger which adds native support for LLM prompting and tool calling.
 Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
 
-### 1. Install Dagger
+#### 1. Install Dagger
 
 First, install the latest release of Dagger,
 by following the [official intallation instructions](https://docs.dagger.io/install).
 
 We will use stable Dagger to build and run the development version of Dagger.
 
-### 2. Build dagger-llm client
+#### 2. Build dagger-llm client
 
 Run this command from the root of the `melvin` repository:
 
@@ -66,7 +156,7 @@ This builds the llm-enabled version of the Dagger CLI, and installs it at `~/bin
 The first build might take a few minutes. Subsequent builds will be much faster due to caching.
 
 
-### 3. Run the dagger-llm engine
+#### 3. Run the dagger-llm engine
 
 Run this command from the root of the `melvin` repository:
 
@@ -80,7 +170,7 @@ This builds the llm-enabled version of the Dagger engine, and runs it.
 Leave it running for the duration of your use of Melvin.
 
 
-### 4. Configure your environment
+#### 4. Configure Dagger CLI
 
 To connect to the development engine when using the development CLI, you need to set an environment variable:
 
@@ -88,70 +178,43 @@ To connect to the development engine when using the development CLI, you need to
 export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234
 ```
 
+#### 5. Configure LLM integration
 
-### 5. Run Melvin from the command-line
+LLM integration requires connecting to an OpenAI endpoint (other LLM providers will be supported soon).
 
-To run Melvin from the command-line, load one of its modules from the dagger CLI,
-and run functions.
+Write your OpenAI token to a `LLM_KEY` variable in the `.env` file in the current directory.
+You can write the actual token plaintext, or a reference to the secret in 1password, Hashicorp vault, a local file,
+or an env variable.
 
-
-```console
-dagger-llm shell <<EOF
-./toy-programmer | go-program "develop a curl clone" | terminal
-EOF
-```
-
-
-This loads the `./toy-programmer` module, calls the function `go-program` with a description of a
-program to write, then runs the `terminal` function on the returned container.
-
-
-You can also explore available functions interactively:
+For example:
 
 ```console
-dagger-llm shell
+$ cat .env
+# Plaintext format
+LLM_KEY=sk-pr....
 ```
-
-Then use tab auto-completion to explore.
-
-
-### 6. Integrate Melvin in your application
-
-You can embed Dagger modules into your application. To do so:
-
-1. Initialize a Dagger module at the root of your application.
-This doesn't need to be the root of your git repository - Dagger is monorepo-ready.
 
 ```console
-dagger-llm init
+$ cat .env
+# 1password reference format
+LLM_KEY=op://Dev/askdjhsajkdhsajkdhaskjdsa/credential
 ```
-
-2. Install the modules you wish to load
-
-For example, to install the Melvin toy-workspace module:
 
 ```console
-dagger-llm install github.com/shykes/melvin/toy-workspace
+$ cat .env
+# Hashicorp vault format
+LLM_KEY=vault://kjsdfjksdhfjkdsfjkhdskjf
 ```
 
-3. Install a generated client in your project
+In any case, *make sure the file is in the current directory when you call the Dagger CLI*.
 
-*TODO: this feature is not yet merged in a stable version of Dagger*
+#### 6. Initialize LLM integration
 
-This will configure Dagger to generate client bindings for the language of your choice.
-
-For example, if your project is a Python application:
+After initial setup, you need to initialize the llm integration by running this command once:
 
 ```console
-dagger-llm client install python
+~/bin/dagger-llm shell -c llm | with-prompt "LLM, are you there?" | last-reply
 ```
 
-4. Re-generate clients
-
-*TODO: this feature is not yet merged in a stable version of Dagger*
-
-Any time you need to re-generate your client, run:
-
-```console
-dagger-llm client generate
-```
+After execution completes, you should see a response from the LLM printed.
+If so, congratulations! You have complete setup. Time to use Melvin!

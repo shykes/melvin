@@ -6,14 +6,14 @@ which dagger 2>/dev/null || {
     echo >&2 "Dagger not installed. Follow installation instructions at https://docs.dagger.io/install"
     exit 1
 }
-# Only prompt for LLM_KEY if .env doesn't exist or if LLM_KEY not set in .env
-if [ ! -f .env ] || ! grep -q "^LLM_KEY=" .env; then
-    printf "Enter your LLM_KEY (plaintext, or reference uri: op:// vault:// env:// file://) "
-    read LLM_KEY
+# Only prompt for OPENAI_API_KEY if .env doesn't exist or if OPENAPI_API_KEY not set in .env
+if [ ! -f .env ] || ! grep -q "^OPENAI_API_KEY=" .env; then
+    printf "Enter your OPENAI_API_KEY (plaintext, or reference uri: op:// vault:// env:// file://) "
+    read OPENAI_API_KEY
 
     # Create the .env file with the provided key
     cat <<EOF >> .env
-LLM_KEY=${LLM_KEY}
+OPENAI_API_KEY=${OPENAI_API_KEY}
 EOF
 fi
 

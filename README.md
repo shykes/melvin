@@ -182,31 +182,7 @@ export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234
 
 LLM integration requires connecting to an OpenAI endpoint (other LLM providers will be supported soon).
 
-Write your OpenAI token to a `LLM_KEY` variable in the `.env` file in the current directory.
-You can write the actual token plaintext, or a reference to the secret in 1password, Hashicorp vault, a local file,
-or an env variable.
-
-For example:
-
-```console
-$ cat .env
-# Plaintext format
-LLM_KEY=sk-pr....
-```
-
-```console
-$ cat .env
-# 1password reference format
-LLM_KEY=op://Dev/askdjhsajkdhsajkdhaskjdsa/credential
-```
-
-```console
-$ cat .env
-# Hashicorp vault format
-LLM_KEY=vault://kjsdfjksdhfjkdsfjkhdskjf
-```
-
-In any case, *make sure the file is in the current directory when you call the Dagger CLI*.
+Make sure `OPENAI_API_KEY` is set in your environment, or in a `.env` file in the current directory.
 
 #### 6. Initialize LLM integration
 

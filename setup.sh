@@ -35,7 +35,6 @@ EOF
 
 echo "--- Running Engine"
 echo "--- To connect: _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234 ~/bin/dagger-llm shell"
-echo "--- Run 'llm' as your first command (bug workaround)"
 dagger shell <<EOF
 ./dagger-llm | engine | up
 EOF

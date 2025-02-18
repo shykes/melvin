@@ -186,13 +186,4 @@ LLM integration requires connecting to an OpenAI endpoint (other LLM providers w
 
 Make sure `OPENAI_API_KEY` is set in your environment, or in a `.env` file in the current directory.
 
-#### 6. Initialize LLM integration
-
-After initial setup, you need to initialize the llm integration by running this command once:
-
-```console
-~/bin/dagger-llm shell -c llm | with-prompt "LLM, are you there?" | last-reply
-```
-
-After execution completes, you should see a response from the LLM printed.
-If so, congratulations! You have complete setup. Time to use Melvin!
+You can also set `OPENAI_BASE_URL` for a custom endpoint, and `OPENAI_MODEL` for a default model.

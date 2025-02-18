@@ -8,7 +8,7 @@
     {
       "name": "dagger-dev",
       "source": "github.com/shykes/dagger@llm",
-      "pin": "29d157845ab902d41e0edd42ff04aa77291a3eee"
+      "pin": "2001e418ada8d8d87c32ef9d6ed1cceee25b626e"
     }
   ],
   "source": "."

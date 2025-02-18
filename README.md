@@ -120,7 +120,7 @@ Any time you need to re-generate your client, run:
 To get started quickly:
 
 1. Run `./setup.sh` in the root of the repo. Leave it running, and open a new terminal.
-2. `export EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234`
+2. `export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234`
 3. `~/bin/dagger-llm shell -c 'llm | with-prompt "llm, are you there?" | last-reply'`
 4. If you got a response from the LLM, congratulations! Setup is complete.
 5. Continue to [running Melvin in the command-line](#run-melvin-from-the-command-line)

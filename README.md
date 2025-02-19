@@ -44,32 +44,69 @@ The Dagger community is very welcoming, and will be happy to answer your questio
 
 Do this now! It will make the rest of the experience more productive, and more fun.
 
+
+## Initial setup
+
+### 1. Install Dagger
+
+Melvin's only dependency is Dagger - specifically a *development version* of Dagger which adds native support for LLM prompting and tool calling.
+
+Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
+
+Install the development version of LLM-enabled Dagger:
+
+```console
+curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.16.0-llm.1 BIN_DIR=/usr/local/bin sh
+```
+
+You can adjust `BIN_DIR` to customize where the `dagger` CLI is installed.
+
+Verify that your Dagger installation works:
+
+```console
+$ dagger core version
+v0.16.0-llm.1
+```
+
+### 2.Configure LLM endpoints
+
+Dagger uses your system's standard environment variables to route LLM requests. Currently these variables are supported:
+
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL`
+- `OPENAI_MODEL`
+- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_BASE_URL`
+- `ANTHROPIC_MODEL`
+
+Dagger will look for these variables in your environment, or in a `.env` file in the current directory (`.env` files in parent directories are not yet supported).
+
+
 ## Run Melvin from the command-line
 
-To run Melvin from the command-line:
+To run Melvin from the command-line, use the `dagger` CLI to load one of its modules, and call its functions.
 
-- first [complete initial setup](#initial-setup).
-- Load one of the Melvin modules from the dagger CLI, and run functions
-
-For example:
+For example, to use the `toy-programmer` module:
 
 ```console
-~/bin/dagger-llm shell <<EOF
-./toy-programmer | go-program "develop a curl clone" | terminal
-EOF
+dagger shell -m ./toy-programmer
 ```
 
-This loads the `./toy-programmer` module, calls the function `go-program` with a description of a
-program to write, then runs the `terminal` function on the returned container.
+Then, run this command in the dagger shell:
 
-You can also explore available functions interactively:
-
-```console
-~/bin/dagger-llm shell
+```
+.doc
 ```
 
-Then use tab auto-completion to explore.
+This prints available functions. Let's call one:
 
+```
+go-program "develop a curl clone" | terminal
+```
+
+This calls the `go-program` function with a description of a program to write, then runs the `terminal` function on the returned container.
+
+You can use tab-completion to explore other available functions.
 
 ### Integrate Melvin in your application
 
@@ -80,7 +117,7 @@ Supported languages are Python, Typescript, Go, Java, PHP - with more language s
 This doesn't need to be the root of your git repository - Dagger is monorepo-ready.
 
 ```console
-~/bin/dagger-llm init
+dagger init
 ```
 
 2. Install the modules you wish to load
@@ -88,7 +125,7 @@ This doesn't need to be the root of your git repository - Dagger is monorepo-rea
 For example, to install the Melvin toy-workspace module:
 
 ```console
-~/bin/dagger-llm install github.com/shykes/melvin/toy-workspace
+dagger install github.com/shykes/melvin/toy-workspace
 ```
 
 3. Install a generated client in your project
@@ -100,7 +137,7 @@ This will configure Dagger to generate client bindings for the language of your 
 For example, if your project is a Python application:
 
 ```console
-~/bin/dagger-llm client install python
+dagger client install python
 ```
 
 4. Re-generate clients
@@ -110,80 +147,5 @@ For example, if your project is a Python application:
 Any time you need to re-generate your client, run:
 
 ```console
-~/bin/dagger-llm client generate
+dagger client generate
 ```
-
-## Initial Setup
-
-### Option 1: Quickstart
-
-To get started quickly:
-
-1. Run `./setup.sh` in the root of the repo. Leave it running, and open a new terminal.
-2. `export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234`
-3. `~/bin/dagger-llm shell -c 'llm | with-prompt "llm, are you there?" | last-reply'`
-4. If you got a response from the LLM, congratulations! Setup is complete.
-5. Continue to [running Melvin in the command-line](#run-melvin-from-the-command-line)
-
-### Option 2: Not-so-quick-start
-
-If the quickstart script doesn't work, or if you want to understand each step of the setup, follow these instructions.
-
-#### Overview
-
-Melvin's only dependency is Dagger.
-
-At the moment, it requires a *development version* of Dagger which adds native support for LLM prompting and tool calling.
-Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
-
-#### 1. Install Dagger
-
-First, install the latest release of Dagger,
-by following the [official intallation instructions](https://docs.dagger.io/install).
-
-We will use stable Dagger to build and run the development version of Dagger.
-
-#### 2. Build dagger-llm client
-
-Run this command from the root of the `melvin` repository:
-
-```console
-dagger shell <<EOF
-./dagger-llm | cli current | export $HOME/bin/dagger-llm
-EOF
-```
-
-This builds the llm-enabled version of the Dagger CLI, and installs it at `~/bin/dagger-llm`.
-
-The first build might take a few minutes. Subsequent builds will be much faster due to caching.
-
-
-#### 3. Run the dagger-llm engine
-
-Run this command from the root of the `melvin` repository:
-
-```console
-dagger shell <<EOF
-./dagger-llm | engine | up
-EOF
-```
-
-This builds the llm-enabled version of the Dagger engine, and runs it.
-Leave it running for the duration of your use of Melvin.
-
-
-#### 4. Configure Dagger CLI
-
-To connect to the development engine when using the development CLI, you need to set an environment variable:
-
-```console
-export _EXPERIMENTAL_DAGGER_RUNNER_HOST=tcp://localhost:1234
-```
-
-#### 5. Configure LLM integration
-
-LLM integration requires connecting to an OpenAI endpoint (other LLM providers will be supported soon).
-
-Make sure `OPENAI_API_KEY` is set in your environment, or in a `.env` file in the current directory.
-
-You can also set `OPENAI_BASE_URL` for a custom endpoint, and `OPENAI_MODEL` for a default model.

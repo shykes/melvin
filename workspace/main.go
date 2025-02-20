@@ -34,8 +34,12 @@ type Workspace struct {
 
 type Checker interface {
 	dagger.DaggerObject
-	WithDirectory(dir *dagger.Directory) Checker
-	Check(context.Context) error
+	Check(ctx context.Context, dir *dagger.Directory) error
+}
+
+type Notifier interface {
+	dagger.DaggerObject
+	Notify(ctx context.Context, message string) error
 }
 
 type Snapshot struct {
@@ -50,11 +54,9 @@ func (s Workspace) Check(ctx context.Context) error {
 		return nil
 	}
 	for i := range s.Checkers {
-		checker := s.Checkers[i].WithDirectory(s.Dir)
-		if err := checker.Check(ctx); err != nil {
+		if err := s.Checkers[i].Check(ctx, s.Dir); err != nil {
 			return err
 		}
-		s.Checkers[i] = checker
 	}
 	return nil
 }

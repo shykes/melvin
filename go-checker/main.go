@@ -6,18 +6,11 @@ import (
 	"errors"
 )
 
-type GoChecker struct {
-	Dir *dagger.Directory
-}
+type GoChecker struct{}
 
-func (checker GoChecker) WithDirectory(dir *dagger.Directory) GoChecker {
-	checker.Dir = dir
-	return checker
-}
-
-func (checker GoChecker) Check(ctx context.Context) error {
+func (checker GoChecker) Check(ctx context.Context, dir *dagger.Directory) error {
 	execOpts := dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny}
-	check := dag.Go(checker.Dir).
+	check := dag.Go(dir).
 		Env().
 		WithExec([]string{"sh", "-c", "go mod tidy && go build ./..."}, execOpts)
 	code, err := check.ExitCode(ctx)

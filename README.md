@@ -56,7 +56,7 @@ Once this feature is merged (current target is 0.17), Melvin will support with a
 Install the development version of LLM-enabled Dagger:
 
 ```console
-curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.16.0-llm.1 BIN_DIR=/usr/local/bin sh
+curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.17.0-llm.1 BIN_DIR=/usr/local/bin sh
 ```
 
 You can adjust `BIN_DIR` to customize where the `dagger` CLI is installed.
@@ -65,7 +65,7 @@ Verify that your Dagger installation works:
 
 ```console
 $ dagger core version
-v0.16.0-llm.1
+v0.17.0-llm.1
 ```
 
 ### 2.Configure LLM endpoints

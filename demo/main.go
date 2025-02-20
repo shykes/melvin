@@ -48,10 +48,8 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	}
 	// Initialize a Go-specific workspace
 	workspace := dag.Workspace(dagger.WorkspaceOpts{
-		Start: start,
-		Checker: dag.Go(dag.Directory()).Base().
-			WithWorkdir("/app").
-			WithDefaultArgs([]string{"sh", "-c", "go mod tidy && go build ./..."}),
+		Start:    start,
+		Checkers: []*dagger.WorkspaceChecker{dag.GoChecker().AsWorkspaceChecker()},
 	})
 	var (
 		diff string

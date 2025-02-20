@@ -1,6 +1,6 @@
 {
   "name": "demo",
-  "engineVersion": "v0.15.4-250209174041-493a42a5239c",
+  "engineVersion": "v0.16.0-llm.1",
   "sdk": {
     "source": "go"
   },
@@ -18,6 +18,10 @@
       "name": "go",
       "source": "github.com/dagger/dagger/modules/go",
       "pin": "a99139ba894f240808fa6c1c9fd995ffba58cf41"
+    },
+    {
+      "name": "go-checker",
+      "source": "../go-checker"
     },
     {
       "name": "reviewer",

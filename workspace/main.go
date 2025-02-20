@@ -6,13 +6,8 @@ import (
 )
 
 func New(
-	// A builder container, for verifying that the code builds, tests run etc.
-	// Container spec:
-	// - Workspace will be mounted to container workdir
-	// - Container default args will be executed.
-	// - Exit code 0 is considered a successful check. Otherwise a failure.
 	// +optional
-	checker *dagger.Container,
+	checkers []Checker,
 	// Initial state to start the workspace from
 	// By default the workspace starts empty
 	// +optional
@@ -22,9 +17,9 @@ func New(
 		start = dag.Directory()
 	}
 	return Workspace{
-		Start:   start,
-		Dir:     start,
-		Checker: checker,
+		Start:    start,
+		Dir:      start,
+		Checkers: checkers,
 	}
 }
 
@@ -32,35 +27,36 @@ func New(
 type Workspace struct {
 	Start *dagger.Directory // +private
 	// An immutable snapshot of the workspace contents
-	Dir         *dagger.Directory
-	Checker     *dagger.Container // +private
-	Checkpoints []Checkpoint      // +private
+	Dir       *dagger.Directory
+	Checkers  []Checker  // +private
+	Snapshots []Snapshot // +private
 }
 
-type Checkpoint struct {
+type Checker interface {
+	dagger.DaggerObject
+	WithDirectory(dir *dagger.Directory) Checker
+	Check(context.Context) error
+}
+
+type Snapshot struct {
 	Description string
 	Dir         *dagger.Directory
 }
 
 // Check that the current contents is valid
-// This is done by executed an externally-provided checker container with the workspace mounted.
-// If there is no checker, the check will always pass
-func (s Workspace) Check(ctx context.Context) (string, error) {
-	if s.Checker == nil {
-		return "No checker configured", nil
+// Always check before completing your task
+func (s Workspace) Check(ctx context.Context) error {
+	if len(s.Checkers) == 0 {
+		return nil
 	}
-	check := s.Checker.
-		WithMountedDirectory(".", s.Dir).
-		WithExec(nil, dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny})
-	code, err := check.ExitCode(ctx)
-	if err != nil {
-		return "", err
+	for i := range s.Checkers {
+		checker := s.Checkers[i].WithDirectory(s.Dir)
+		if err := checker.Check(ctx); err != nil {
+			return err
+		}
+		s.Checkers[i] = checker
 	}
-	if code != 0 {
-		stderr, err := check.Stderr(ctx)
-		return "error: " + stderr, err
-	}
-	return check.Stdout(ctx)
+	return nil
 }
 
 // Return all changes to the workspace since the start of the session,
@@ -81,20 +77,24 @@ func (ws Workspace) Diff(ctx context.Context) (string, error) {
 		Stdout(ctx)
 }
 
-// Checkpoint the current state of the workspace, with a description of the changes made.
-func (ws Workspace) Checkpoint(description string) Workspace {
-	ws.Checkpoints = append(ws.Checkpoints, Checkpoint{
+// Save a snapshot of the workspace
+func (ws Workspace) Save(
+	ctx context.Context,
+	// A detailed description of the changes to save
+	description string,
+) Workspace {
+	ws.Snapshots = append(ws.Snapshots, Snapshot{
 		Description: description,
 		Dir:         ws.Dir,
 	})
 	return ws
 }
 
-// Return a history of all checkpoints so far, from first to last
+// Return a history of all Snapshots so far, from first to last
 func (ws Workspace) History() []string {
 	var history []string
-	for _, checkpoint := range ws.Checkpoints {
-		history = append(history, checkpoint.Description)
+	for _, Snapshot := range ws.Snapshots {
+		history = append(history, Snapshot.Description)
 	}
 	return history
 }

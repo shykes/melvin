@@ -50,6 +50,7 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 	workspace := dag.Workspace(dagger.WorkspaceOpts{
 		Start:    start,
 		Checkers: []*dagger.WorkspaceChecker{dag.GoChecker().AsWorkspaceChecker()},
+		OnSave:   []*dagger.WorkspaceNotifier{progress.AsWorkspaceNotifier()},
 	})
 	var (
 		diff string
@@ -76,10 +77,6 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-		suggestions, err := reviewed.File(".review/suggestions").Contents(ctx)
-		if err != nil {
-			return nil, err
-		}
 		status := "❗"
 		if score >= 7 {
 			status = "✅"
@@ -87,8 +84,8 @@ func (m *Demo) GoProgrammer(ctx context.Context,
 		progress = progress.
 			StartTask(
 				fmt.Sprintf("review-%d", i),
-				fmt.Sprintf("Submit review:\n\n````\n%s\n````\n", diff),
-				fmt.Sprintf("%s %d/10: %s\n\n%s", status, score, summary, suggestions),
+				fmt.Sprintf("Code review #%d", i),
+				fmt.Sprintf("%s %d/10: %s", status, score, summary),
 			)
 		if err := progress.Publish(ctx); err != nil {
 			return nil, err

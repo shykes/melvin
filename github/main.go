@@ -58,6 +58,13 @@ type Task struct {
 	Status      string
 }
 
+// Send a notification as an in-place update to a Github issue comment
+func (r ProgressReport) Notify(ctx context.Context, message string) (ProgressReport, error) {
+	r = r.StartTask(message, message, "✅")
+	err := r.Publish(ctx)
+	return r, err
+}
+
 // Write a new summary for the progress report.
 // Any previous summary is overwritten.
 // This function only stages the change. Call publish to actually apply it.
@@ -97,20 +104,19 @@ func (r ProgressReport) AppendSummary(
 // Report the starting of a new task
 // This function only stages the change. Call publish to actually apply it.
 func (r ProgressReport) StartTask(
-	ctx context.Context,
 	// A unique key for the task. Not sent in the comment. Use to update the task status later.
 	key string,
 	// The task description. It will be formatted as a cell in the first column of a markdown table
 	description string,
 	// The task status. It will be formatted as a cell in the second column of a markdown table
 	status string,
-) (ProgressReport, error) {
+) ProgressReport {
 	r.Tasks = append(r.Tasks, Task{
 		Key:         key,
 		Description: description,
 		Status:      status,
 	})
-	return r, nil
+	return r
 }
 
 // Write a new title for the progress report.

@@ -6,8 +6,12 @@ import (
 )
 
 func New(
+	// Configurable backends for check()
 	// +optional
 	checkers []Checker,
+	// Notification hooks to call every time save() is called
+	// +optional
+	onSave []Notifier,
 	// Initial state to start the workspace from
 	// By default the workspace starts empty
 	// +optional
@@ -20,6 +24,7 @@ func New(
 		Start:    start,
 		Dir:      start,
 		Checkers: checkers,
+		OnSave:   onSave,
 	}
 }
 
@@ -29,6 +34,7 @@ type Workspace struct {
 	// An immutable snapshot of the workspace contents
 	Dir       *dagger.Directory
 	Checkers  []Checker  // +private
+	OnSave    []Notifier // +private
 	Snapshots []Snapshot // +private
 }
 
@@ -39,7 +45,7 @@ type Checker interface {
 
 type Notifier interface {
 	dagger.DaggerObject
-	Notify(ctx context.Context, message string) error
+	Notify(message string) Notifier
 }
 
 type Snapshot struct {
@@ -89,6 +95,10 @@ func (ws Workspace) Save(
 		Description: description,
 		Dir:         ws.Dir,
 	})
+	for i := range ws.OnSave {
+		// FIXME: what happens if there's an error?
+		ws.OnSave[i] = ws.OnSave[i].Notify(description)
+	}
 	return ws
 }
 

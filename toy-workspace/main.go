@@ -1,4 +1,3 @@
-// A toy workspace for editing and building go programs
 package main
 
 import (
@@ -6,8 +5,16 @@ import (
 	"dagger/toy-workspace/internal/dagger"
 )
 
+// A toy workspace that can edit files and run 'go build'
+type ToyWorkspace struct {
+	// The workspace's container state.
+	// +internal-use-only
+	Container *dagger.Container
+}
+
 func New() ToyWorkspace {
 	return ToyWorkspace{
+		// Build a base container optimized for Go development
 		Container: dag.Container().
 			From("golang").
 			WithDefaultTerminalCmd([]string{"/bin/bash"}).
@@ -16,36 +23,19 @@ func New() ToyWorkspace {
 	}
 }
 
-type ToyWorkspace struct {
-	// The workspace container.
-	// +internal-use-only
-	Container *dagger.Container
-}
-
 // Read a file
-func (w *ToyWorkspace) Read(
-	ctx context.Context,
-	// The path of the file
-	path string) (string, error) {
+func (w *ToyWorkspace) Read(ctx context.Context, path string) (string, error) {
 	return w.Container.File(path).Contents(ctx)
 }
 
 // Write a file
-func (w *ToyWorkspace) Write(
-	// The path of the file
-	path string,
-	// The content to write
-	content string,
-) *ToyWorkspace {
+func (w ToyWorkspace) Write(path, content string) ToyWorkspace {
 	w.Container = w.Container.WithNewFile(path, content)
 	return w
 }
 
 // Build the code at the current directory in the workspace
-func (w *ToyWorkspace) Build(ctx context.Context) (string, error) {
-	// We just execute "go build" in the container,
-	buildCommand := []string{"go", "build", "./..."}
-	return w.Container.
-		WithExec(buildCommand, dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny}).
-		Stderr(ctx)
+func (w *ToyWorkspace) Build(ctx context.Context) error {
+	_, err := w.Container.WithExec([]string{"go", "build", "./..."}).Stderr(ctx)
+	return err
 }

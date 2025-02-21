@@ -31,7 +31,7 @@ As we will see, these principles apply to both *complex builds* and *complex AI 
 
 ## Building AI agents with Dagger
 
-Dagger's module system allows implement agentic features as modular components that you can integrate into your application, or use individually.
+Dagger's module system allows implementing agentic features as modular components that you can integrate into your application, or use individually.
 
 Each module has the following features:
 
@@ -42,10 +42,17 @@ Each module has the following features:
 - Cross-language extensions. Add your own modules in any language.
 - Platform-independent. No infrastructure lock-in! Runs on any hosting provider that can run containers.
 
-These features are achieved by using the [Dagger Engine](https://dagger.io) as a runtime.
+Dagger and your IDE are the only dependency for developing and running these modules.
+The entire environment is containerized, for maximum portability.
 
-Dagger is the only dependency for Melvin. No other tooling or programming environment is required:
-the entire environment is containerized, for maximum portability.
+## Community
+
+Building AI agents on Dagger is an exciting new use case, *that still has rough edges*. We strongly recommend [joining our Community discord](https://discord.gg/KK3AfBP8Gw).
+The Dagger community is very welcoming, and will be happy to answer your questions, discuss your use case ideas, and help you get started.
+
+Do this now! It will make the rest of the experience more productive, and more fun.
+
+See also [this Twitter thread](https://x.com/solomonstre/status/1891205257516003344) for examples, discussions and demos.
 
 ## Examples
 
@@ -57,14 +64,6 @@ The repository includes several examples of Dagger modules with agentic capabili
 - [reviewer](./reviewer): a code reviewer micro-agent
 - [github](./github): a module for sending progress updates in a github issue
 - [demo](./demo): a collection of demo functions tying the other modules together
-
-## Community
-
-We strongly recommend [joining our Community discord](https://discord.gg/KK3AfBP8Gw).
-The Dagger community is very welcoming, and will be happy to answer your questions, discuss your use case ideas, and help you get started.
-
-Do this now! It will make the rest of the experience more productive, and more fun.
-
 
 ## Initial setup
 

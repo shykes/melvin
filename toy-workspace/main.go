@@ -10,6 +10,7 @@ func New() ToyWorkspace {
 	return ToyWorkspace{
 		Container: dag.Container().
 			From("golang").
+			WithDefaultTerminalCmd([]string{"/bin/bash"}).
 			WithMountedCache("/go/pkg/mod", dag.CacheVolume("go_mod_cache")).
 			WithWorkdir("/app"),
 	}
@@ -43,7 +44,6 @@ func (w *ToyWorkspace) Write(
 // Build the code at the current directory in the workspace
 func (w *ToyWorkspace) Build(ctx context.Context) (string, error) {
 	// We just execute "go build" in the container,
-	// and discard the changes
 	buildCommand := []string{"go", "build", "./..."}
 	return w.Container.
 		WithExec(buildCommand, dagger.ContainerWithExecOpts{Expect: dagger.ReturnTypeAny}).

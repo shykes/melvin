@@ -1,16 +1,39 @@
-# Melvin: a toy open-source programming agent
+# Build AI agents with Dagger
 
-*WARNING: unfinished, experimental software*
+## Overview
 
-This project is for educational purposes and should not be used for actual production-grade programming tasks.
-There are several great "programming agent" products on the market, including [Devin](https://devin.ai), [Lovable](https://lovable.dev), [Replit Agent](https://replit.com), [V0](https://v0.dev) and many more.
+Dagger is best known for [making CI less terrible](https://docs.dagger.io/#what-problem-does-dagger-solve),
+by transforming a mess of artisanal build scripts into clean containerized functions that can run anywhere.
 
-## Architecture
+But Dagger is actually a complete runtime and programming environment for distributed applications,
+with unique features such as *repeatability*, *caching*, *tracing*, *platform independence*, and a [growing cross-language ecosystem](https://daggerverse.dev).
 
-Rather than a monolithic application, Melvin is a set of modular components that you can integrate into your application,
-or use individually.
+Besides complex build and test workflows, these features are **perfect for running AI agents**.
 
-Each Melvin module has the following features:
+This repository explores how and why to use Dagger to build AI agents.
+
+## What is Dagger?
+
+Dagger is a new kind of runtime and programming environment for distributed applications, by the creators of Docker.
+
+Dagger is open-source, and can be installed on any machine that can run Linux containers.
+This includes Mac and Windows machines with a Docker-compatible tool installed.
+
+It builds on familiar, proven technology such as [containers](https://github.com/opencontainers/runc),
+[DAG engines](https://github.com/moby/buildkit) and [GraphQL](https://graphql.org), and integrates them
+into a development experience that emphasizes *simplicity*, *speed* and *repeatability*.
+
+- *Simplicity*: quality software is built from simple components, just like Lego bricks.
+- *Speed*: success requires rapid iteration. The faster one can iterate, the faster one can improve.
+- *Repeatability*: when components can be trusted to consistently produce the same results under the same conditions, one can build more powerful software, faster.
+
+As we will see, these principles apply to both *complex builds* and *complex AI workflows*.
+
+## Building AI agents with Dagger
+
+Dagger's module system allows implement agentic features as modular components that you can integrate into your application, or use individually.
+
+Each module has the following features:
 
 - Runs in containers, for maximum portability and reproducibility
 - Can be run from the command-line, or programmatically via an API
@@ -20,15 +43,13 @@ Each Melvin module has the following features:
 - Platform-independent. No infrastructure lock-in! Runs on any hosting provider that can run containers.
 
 These features are achieved by using the [Dagger Engine](https://dagger.io) as a runtime.
-Dagger is open-source, and can be installed on any machine that can run Linux containers.
-This includes Mac and Windows machines with a Docker-compatible tool installed.
 
 Dagger is the only dependency for Melvin. No other tooling or programming environment is required:
 the entire environment is containerized, for maximum portability.
 
-## Modules
+## Examples
 
-The following modules are currently implemented:
+The repository includes several examples of Dagger modules with agentic capabilities, which you can use as inspiration.
 
 - [toy-workspace](./toy-workspace): a very, very simple development workspace for demo purposes
 - [toy-programmer](./toy-programmer): a very, very simple programmer micro-agent for demo purposes
@@ -51,7 +72,7 @@ Do this now! It will make the rest of the experience more productive, and more f
 
 *Note: the latest version is `0.17.0-llm.2`. It was released on Feb 21 2025. If you are running an older build, we recommend upgrading.*
 
-Melvin's only dependency is Dagger - specifically a *development version* of Dagger which adds native support for LLM prompting and tool calling.
+You will need a *development version* of Dagger which adds native support for LLM prompting and tool calling.
 
 Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
 
@@ -126,9 +147,9 @@ OPENAI_BASE_URL=http://192.168.64.1:11434/v1/
 OPENAI_MODEL=llama3.2
 ```
 
-## Run Melvin from the command-line
+## Run modules from the command-line
 
-To run Melvin from the command-line, use the `dagger` CLI to load one of its modules, and call its functions.
+Use the `dagger` CLI to load a module and call its functions.
 
 For example, to use the `toy-programmer` module:
 
@@ -152,7 +173,7 @@ This calls the `go-program` function with a description of a program to write, t
 
 You can use tab-completion to explore other available functions.
 
-### Integrate Melvin in your application
+### Integrate Dagger into your application
 
 You can embed Dagger modules into your application.
 Supported languages are Python, Typescript, Go, Java, PHP - with more language support under development.

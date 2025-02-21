@@ -49,6 +49,8 @@ Do this now! It will make the rest of the experience more productive, and more f
 
 ### 1. Install Dagger
 
+*Note: the latest version is `0.17.0-llm.2`. It was released on Feb 21 2025. If you are running an older build, we recommend upgrading.*
+
 Melvin's only dependency is Dagger - specifically a *development version* of Dagger which adds native support for LLM prompting and tool calling.
 
 Once this feature is merged (current target is 0.17), Melvin will support with a stable release of Dagger.
@@ -56,7 +58,7 @@ Once this feature is merged (current target is 0.17), Melvin will support with a
 Install the development version of LLM-enabled Dagger:
 
 ```console
-curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.17.0-llm.1 BIN_DIR=/usr/local/bin sh
+curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.17.0-llm.2 BIN_DIR=/usr/local/bin sh
 ```
 
 You can adjust `BIN_DIR` to customize where the `dagger` CLI is installed.
@@ -65,7 +67,7 @@ Verify that your Dagger installation works:
 
 ```console
 $ dagger core version
-v0.17.0-llm.1
+v0.17.0-llm.2
 ```
 
 ### 2.Configure LLM endpoints

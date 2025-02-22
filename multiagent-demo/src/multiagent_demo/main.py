@@ -32,8 +32,7 @@ class MultiagentDemo:
         current_weather = (
             coder.toy_workspace()
             .container()
-            .with_exec(["go", "build", "./..."])
-            .with_exec(["./weather"], redirect_stdout="weather.txt")
+            .with_exec(["go", "run", "."], redirect_stdout="weather.txt")
             .file("weather.txt")
         )
 

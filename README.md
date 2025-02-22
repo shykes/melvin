@@ -64,6 +64,8 @@ The repository includes several examples of Dagger modules with agentic capabili
 - [reviewer](./reviewer): a code reviewer micro-agent
 - [github](./github): a module for sending progress updates in a github issue
 - [demo](./demo): a collection of demo functions tying the other modules together
+- [multiagent](./multiagent-demo): a demo using multiple LLMs to solve a problem
+- [github-go-coder](./github-go-coder): a Go programmer micro-agent that receives assignments from GitHub issues and creates PRs with it's solutions
 
 ## Initial setup
 
@@ -131,7 +133,7 @@ ip addr | grep "inet " | grep -v 127.0.0.1
 
 This step is needed because our LLM type runs inside the engine and needs to reach your local Ollama service. While we're potentially exploring the implementatin of automatic tunneling, for now you'll need to use your machine's actual IP address instead of localhost to allow the containers to communicate with Ollama.
 
-1. Configure the following environment variables (replace `YOUR_IP` with the IP address from step 3):
+4. Configure the following environment variables (replace `YOUR_IP` with the IP address from step 3):
 
 ```plaintext
 OPENAI_API_KEY="nothing"
@@ -145,6 +147,15 @@ OPENAI_API_KEY="nothing"
 OPENAI_BASE_URL=http://192.168.64.1:11434/v1/
 OPENAI_MODEL=llama3.2
 ```
+
+5. Pull some models to your local Ollama service:
+
+```shell
+ollama pull llama3.2
+```
+
+Note that to successfully give the LLM Dagger's API to use as a tool, the model should support tools.
+Here's a list curated by Ollama of models that support tools: [Ollama models supporting tools](https://ollama.com/search?c=tools)
 
 ## Run modules from the command-line
 

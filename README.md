@@ -58,12 +58,8 @@ See also [this Twitter thread](https://x.com/solomonstre/status/1891205257516003
 
 The repository includes several examples of Dagger modules with agentic capabilities, which you can use as inspiration.
 
-- [toy-workspace](./toy-workspace): a very, very simple development workspace for demo purposes
 - [toy-programmer](./toy-programmer): a very, very simple programmer micro-agent for demo purposes
-- [workspace](./workspace): a slightly more powerful workspace, with checkpoint and history features, and a configurable check function
-- [reviewer](./reviewer): a code reviewer micro-agent
-- [github](./github): a module for sending progress updates in a github issue
-- [demo](./demo): a collection of demo functions tying the other modules together
+- [melvin](./melvin): Melvin is [Devin](https://devin.ai)'s little cousin 😄. An experimental open-source coding agent, made of small composable modules rather than one monolithic app.
 - [multiagent](./multiagent-demo): a demo using multiple LLMs to solve a problem
 - [github-go-coder](./github-go-coder): a Go programmer micro-agent that receives assignments from GitHub issues and creates PRs with it's solutions
 

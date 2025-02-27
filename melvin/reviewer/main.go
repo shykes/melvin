@@ -6,17 +6,16 @@ import (
 	"fmt"
 )
 
-type Reviewer struct {
-}
+type Reviewer struct{}
 
-func (reviewer *Reviewer) AddReview(
+func (reviewer *Reviewer) Review(
 	// The original assignment
 	assignment string,
-	// The result of the task to be reviewed
+	// The source code to review
 	dir *dagger.Directory,
 	// The changes that led to the result, in standard diff format
 	diff string,
-) *dagger.Directory {
+) Review {
 	ws := dag.Workspace(dagger.WorkspaceOpts{Start: dir}).
 		Write(".review/assignment", assignment).
 		Write(".review/diff", diff)
@@ -27,6 +26,12 @@ func (reviewer *Reviewer) AddReview(
 		Dir().
 		WithoutFile(".review/diff").
 		WithoutFile(".review/assignment")
+}
+
+type Review struct {
+	Score       int
+	Summary     string
+	Suggestions string
 }
 
 // Extract the score from a directory with a review added

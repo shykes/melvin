@@ -67,7 +67,7 @@ The repository includes several examples of Dagger modules with agentic capabili
 
 ### 1. Install Dagger
 
-*Note: the latest version is `0.17.0-llm.2`. It was released on Feb 21 2025. If you are running an older build, we recommend upgrading.*
+*Note: the latest version is `0.17.0-llm.3`. It was released on Feb 21 2025. If you are running an older build, we recommend upgrading.*
 
 You will need a *development version* of Dagger which adds native support for LLM prompting and tool calling.
 
@@ -76,7 +76,7 @@ Once this feature is merged (current target is 0.17), a development build will n
 Install the development version of LLM-enabled Dagger:
 
 ```console
-curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.17.0-llm.2 BIN_DIR=/usr/local/bin sh
+curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.17.0-llm.3 BIN_DIR=/usr/local/bin sh
 ```
 
 You can adjust `BIN_DIR` to customize where the `dagger` CLI is installed.
@@ -84,8 +84,8 @@ You can adjust `BIN_DIR` to customize where the `dagger` CLI is installed.
 Verify that your Dagger installation works:
 
 ```console
-$ dagger core version
-v0.17.0-llm.2
+$ dagger -c version
+v0.17.0-llm.3
 ```
 
 ### 2.Configure LLM endpoints
@@ -160,13 +160,13 @@ Use the `dagger` CLI to load a module and call its functions.
 For example, to use the `toy-programmer` module:
 
 ```console
-dagger shell -m ./toy-programmer
+dagger -m ./toy-programmer
 ```
 
 Then, run this command in the dagger shell:
 
 ```
-.doc
+.help
 ```
 
 This prints available functions. Let's call one:

@@ -16,7 +16,7 @@ export class ToyProgrammerTs {
       .withToyWorkspace(before)
       .withPromptVar("assignment", assignment)
       .withPromptFile(dag.currentModule().source().file("prompt.txt"))
-      .ToyWorkspace();
+      .toyWorkspace();
 
     // Return the modified workspace's container
     return after.container();

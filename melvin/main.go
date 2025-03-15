@@ -47,7 +47,7 @@ type GoProgrammingTask struct {
 	Reviews    []*Review
 }
 
-func (task *GoProgrammingTask) coderAgent() *dagger.Llm {
+func (task *GoProgrammingTask) coderAgent() *dagger.LLM {
 	coder := dag.Llm().
 		WithWorkspace(task.Workspace).
 		WithPromptVar("assignment", task.Assignment).
@@ -197,7 +197,7 @@ func (task *GoProgrammingTask) firstProgressUpdate(ctx context.Context) (*GoProg
 }
 
 // A "reporter" agent who can send progress updates over github
-func (task *GoProgrammingTask) reporterAgent() *dagger.Llm {
+func (task *GoProgrammingTask) reporterAgent() *dagger.LLM {
 	return dag.Llm().
 		WithPromptVar("assignment", task.Assignment).
 		WithPrompt("You are an expert software engineer tasked with sending progress updates to your team").

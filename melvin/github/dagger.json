@@ -1,6 +1,6 @@
 {
   "name": "github",
-  "engineVersion": "v0.15.3",
+  "engineVersion": "v0.17.1",
   "sdk": {
     "source": "go"
   },
@@ -10,6 +10,5 @@
       "source": "github.com/aluzzardi/daggerverse/github-comment",
       "pin": "ee43f9e5f7203362a9d089d5b65e95f323e5dc65"
     }
-  ],
-  "source": "."
+  ]
 }

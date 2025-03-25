@@ -48,7 +48,7 @@ type GoProgrammingTask struct {
 }
 
 func (task *GoProgrammingTask) coderAgent() *dagger.LLM {
-	coder := dag.Llm().
+	coder := dag.LLM().
 		WithWorkspace(task.Workspace).
 		WithPromptVar("assignment", task.Assignment).
 		WithPromptFile(dag.CurrentModule().Source().File("coder.prompt"))
@@ -102,7 +102,7 @@ type Review struct {
 }
 
 func (task *GoProgrammingTask) Review(ctx context.Context) (*Review, error) {
-	reviewer := dag.Llm().
+	reviewer := dag.LLM().
 		WithWorkspace(task.Workspace).
 		WithPromptVar("assignment", task.Assignment).
 		WithPromptFile(dag.CurrentModule().Source().File("reviewer.prompt"))
@@ -198,7 +198,7 @@ func (task *GoProgrammingTask) firstProgressUpdate(ctx context.Context) (*GoProg
 
 // A "reporter" agent who can send progress updates over github
 func (task *GoProgrammingTask) reporterAgent() *dagger.LLM {
-	return dag.Llm().
+	return dag.LLM().
 		WithPromptVar("assignment", task.Assignment).
 		WithPrompt("You are an expert software engineer tasked with sending progress updates to your team").
 		WithPrompt(`your writing style:
